@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premier League Match Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        .card-header {
+            background-color: #1a237e;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .btn-primary {
+            background-color: #1a237e;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+        }
+        .btn-primary:hover {
+            background-color: #0d47a1;
+        }
+        .prediction-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a237e;
+            margin-top: 20px;
+        }
+        .team-select {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1><i class="fas fa-futbol me-2"></i>Premier League Match Predictor</h1>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 team-select">
+                        <label for="home_team" class="form-label">Home Team</label>
+                        <select class="form-select" id="home_team">
+                            <option value="">Select Home Team</option>
+                            {% for team in teams %}
+                            <option value="{{ team }}">{{ team }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 team-select">
+                        <label for="away_team" class="form-label">Away Team</label>
+                        <select class="form-select" id="away_team">
+                            <option value="">Select Away Team</option>
+                            {% for team in teams %}
+                            <option value="{{ team }}">{{ team }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary" onclick="predictMatch()">
+                        <i class="fas fa-calculator me-2"></i>Predict Match
+                    </button>
+                </div>
+                <div id="prediction" class="text-center prediction-result" style="display: none;">
+                    <div class="mt-4">
+                        <h3>Prediction Result</h3>
+                        <p id="prediction-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function predictMatch() {
+            const homeTeam = document.getElementById('home_team').value;
+            const awayTeam = document.getElementById('away_team').value;
+
+            if (!homeTeam || !awayTeam) {
+                alert('Please select both teams');
+                return;
+            }
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    home_team: homeTeam,
+                    away_team: awayTeam
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('prediction').style.display = 'block';
+                document.getElementById('prediction-text').textContent = 
+                    `${data.home_team} vs ${data.away_team}\nPrediction: ${data.prediction}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while making the prediction');
+            });
+        }
+    </script>
+</body>
+</html> 
